@@ -6,25 +6,18 @@ const HapiSwagger = require("hapi-swagger");
 
 const server = require("./config/server");
 const baseRouter = require("./routes");
-const Pack = require("./package");
+const Pack = require("./package.json");
 
 const init = async () => {
   const swaggerOptions = {
     info: {
       title: "Hapi js API documentation.",
-      version: "1.0.0",
+      // version: Pack.version,
     },
+    // basePath: "/api",
+    documentationPath: "/swagger", 
     schemes: ["http", "https"],
   };
-
-  // await server.register([
-  //   Inert,
-  //   Vision,
-  //   {
-  //     plugin: HapiSwagger,
-  //     options: swaggerOptions,
-  //   },
-  // ]);
 
   await server.register([
     Inert,
@@ -35,20 +28,21 @@ const init = async () => {
     },
   ]);
 
-  server.route({
-    method: "GET",
-    path: "/",
-    handler: (request, h) => {
-      return "Hey from Hapi js server!!";
-    },
-  });
+  // server.route({
+  //   method: "GET",
+  //   path: "/",
+  //   handler: (request, h) => {
+  //     return "Hey from Hapi js server!!";
+  //   },
+  // });
+  
 
   await server.register(baseRouter, {
     routes: {
       prefix: "/api",
     },
   });
-
+  console.log(server.table().map(route => route.path));
   server.events.on("response", function (req) {
     console.log(
       req.info.remoteAddress +
@@ -63,6 +57,7 @@ const init = async () => {
 
   await server.start();
   console.log("Server running at %s", server.info.uri);
+  console.log("Swagger running on http://localhost:3005/documentation");
 };
 
 process.on("unhandledRejection", (err) => {

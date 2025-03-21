@@ -1,5 +1,4 @@
 const Hapi = require("@hapi/hapi");
-const host = "localhost";
 const server = Hapi.server({
   port: 3005,
   host: "localhost",
