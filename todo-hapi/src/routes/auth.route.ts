@@ -13,9 +13,23 @@ const authRoutes: ServerRoute[] = [
     options: {
       validate: {
         payload: Joi.object({
-          email: Joi.string().email().required(),
-          password: Joi.string().min(6).required(),
+          email: Joi.string().email().required().messages({
+            "any.required": "email is required!"
+          }),
+          password: Joi.string().min(6).required().messages({
+            "string.min": "Password must be at least 6 chars",
+            "any.required": "password is required!"
+          }),
         }),
+        failAction: (request, h, err: any) => {
+          // console.log(err);
+          const errorMessage =
+            err?.details?.[0]?.message || "Invalid request payload.";
+          return h
+            .response({ status: "Failed", error: errorMessage })
+            .code(400)
+            .takeover();
+        },
       },
       tags: ["api", "auth"],
       description: "Signup a new user.",
@@ -28,9 +42,22 @@ const authRoutes: ServerRoute[] = [
     options: {
       validate: {
         payload: Joi.object({
-          email: Joi.string().email().required(),
-          password: Joi.string().min(6).required(),
+          email: Joi.string().email().required().messages({
+            "any.required": "email is required!"
+          }),
+          password: Joi.string().required().messages({
+            "any.required": "password is required!"
+          }),
         }),
+        failAction: (request, h, err: any) => {
+          // console.log(err);
+          const errorMessage =
+            err?.details?.[0]?.message || "Invalid request payload.";
+          return h
+            .response({ status: "Failed", error: errorMessage })
+            .code(400)
+            .takeover();
+        },
       },
       tags: ["api", "auth"],
       description: "Login a user.",

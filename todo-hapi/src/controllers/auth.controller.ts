@@ -5,7 +5,9 @@ import { login, signup } from "../services/auth.service";
 export const signupController = async (req: Request, h: ResponseToolkit) => {
   try {
     const payload = req?.payload;
-    const res = signup(payload);
+    // console.log("8 -- contr ",payload)
+    const res = await signup(payload);
+    // console.log(res);
 
     const response: ApiResponse<typeof res> = {
       status: "success",
@@ -15,10 +17,10 @@ export const signupController = async (req: Request, h: ResponseToolkit) => {
 
     return h.response(response).code(200);
   } catch (error: any) {
-    const statusCode = error?.statusCode || 500;
+    const statusCode = error?.code || 500;
     const response: ApiResponse<null> = {
       status: "Failed",
-      error: "Internal server error at signup controller",
+      error: error?.message || "Internal server error at signup controller",
     };
     return h.response(response).code(statusCode);
   }
@@ -27,7 +29,8 @@ export const signupController = async (req: Request, h: ResponseToolkit) => {
 export const loginController = async (req: Request, h: ResponseToolkit) => {
   try {
     const payload = req?.payload;
-    const res = login(payload);
+    const res = await login(payload);
+    // console.log(res)
 
     const response: ApiResponse<typeof res> = {
       status: "success",
@@ -37,10 +40,11 @@ export const loginController = async (req: Request, h: ResponseToolkit) => {
 
     return h.response(response).code(200);
   } catch (error: any) {
-    const statusCode = error?.statusCode || 500;
+    // console.log(error?.message);
+    const statusCode = error?.code || 500;
     const response: ApiResponse<null> = {
       status: "Failed",
-      error: "Internal server error at login controller",
+      error: error?.message || "Internal server error at login controller",
     };
     return h.response(response).code(statusCode);
   }

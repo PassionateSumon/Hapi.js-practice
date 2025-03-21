@@ -14,8 +14,6 @@ const init = async () => {
       title: "Hapi js API documentation.",
       // version: Pack.version,
     },
-    // basePath: "/api",
-    documentationPath: "/swagger", 
     schemes: ["http", "https"],
   };
 

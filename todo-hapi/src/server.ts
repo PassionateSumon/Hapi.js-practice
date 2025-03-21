@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import Jwt from "@hapi/jwt";
 import { registerSwagger } from "./plugins/swagger.plugin";
 import authRoutes from "./routes/auth.route";
+import { prisma } from "./config/db";
+import { ApiError } from "./utils/ApiError.util";
 
 dotenv.config();
 
@@ -10,12 +12,23 @@ const init = async () => {
   const server = Hapi.server({
     port: process.env.PORT,
     host: "localhost",
+    routes: {
+      cors: {
+        origin: ['*']
+      }
+    }
   });
 
   await server.register(Jwt);
   server.auth.strategy("jwt", "jwt", {
     keys: process.env.JWT_SECRET,
     validate: async (decoded: any) => {
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+      });
+      if(!user) {
+        throw new ApiError("Unauthorized!", 401);
+      }
       return { isValid: true, credentials: decoded };
     },
     verify: {
@@ -36,7 +49,7 @@ const init = async () => {
   await server.start();
   console.log(`Server is running on %s `, server.info.uri);
   console.log(
-    `Swagger is running on http://localhost${process.env.PORT}/documentation`
+    `Swagger is running on http://localhost:${process.env.PORT}/documentation`
   );
 };
 
