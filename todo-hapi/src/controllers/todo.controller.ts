@@ -2,6 +2,7 @@ import { Request, ResponseToolkit } from "@hapi/hapi";
 import { ApiResponse } from "../interfaces/ApiResponse.interface";
 import { ApiError } from "../utils/ApiError.util";
 import { prisma } from "../config/db";
+import responseHandler from "../utils/returnFunctions.util";
 
 const checkCreds = (credentials: any) => {
   const userId = credentials?.userId;
@@ -16,13 +17,17 @@ export const addTodo = async (req: Request, h: ResponseToolkit) => {
   try {
     const checkAuth = checkCreds(req.auth.credentials);
     if (checkAuth instanceof ApiError) {
-      return h.response(checkAuth.toJSON()).code(401);
+      responseHandler.error(
+        checkAuth.toJSON(),
+        "Unauthorized to add todo!",
+        401
+      )(h);
     }
 
     const payload: any = req?.payload;
     if (!payload || !payload.todo) {
       const apiError = new ApiError("Must have a todo", 400);
-      return h.response(apiError.toJSON()).code(400);
+      responseHandler.error(apiError.toJSON(), "Must have a todo", 400)(h);
     }
 
     const todo = await prisma.todo.create({
@@ -33,19 +38,14 @@ export const addTodo = async (req: Request, h: ResponseToolkit) => {
       },
     });
 
-    const response: ApiResponse<typeof todo> = {
-      status: "success",
-      data: todo,
-      message: "Todo created successfully.",
-    };
-    return h.response(response).code(200);
+    return responseHandler.success(todo, "Todo created successfully.", 200)(h);
   } catch (error: any) {
     const statusCode = error?.code || 500;
     const response: ApiResponse<null> = {
       status: "Failed",
       error: error?.message || "Internal server error at addTodo controller",
     };
-    return h.response(response).code(statusCode);
+    return responseHandler.error(response, statusCode)(h);
   }
 };
 
