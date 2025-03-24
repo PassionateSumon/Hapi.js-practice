@@ -5,6 +5,7 @@ import { registerSwagger } from "./plugins/swagger.plugin";
 import authRoutes from "./routes/auth.route";
 import { prisma } from "./config/db";
 import { ApiError } from "./utils/ApiError.util";
+import todoRoutes from "./routes/todo.route";
 
 dotenv.config();
 
@@ -14,22 +15,24 @@ const init = async () => {
     host: "localhost",
     routes: {
       cors: {
-        origin: ['*']
-      }
-    }
+        origin: ["*"],
+      },
+    },
   });
 
   await server.register(Jwt);
   server.auth.strategy("jwt", "jwt", {
     keys: process.env.JWT_SECRET,
     validate: async (decoded: any) => {
+      // console.log("27 -- ", decoded);
+      // console.log("27 -- ", decoded.decoded.payload.userId);
       const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
+        where: { id: decoded.decoded.payload.userId },
       });
-      if(!user) {
+      if (!user) {
         throw new ApiError("Unauthorized!", 401);
       }
-      return { isValid: true, credentials: decoded };
+      return { isValid: true, credentials: decoded.decoded.payload };
     },
     verify: {
       aud: false,
@@ -45,6 +48,7 @@ const init = async () => {
   await registerSwagger(server);
 
   server.route(authRoutes);
+  server.route(todoRoutes);
 
   await server.start();
   console.log(`Server is running on %s `, server.info.uri);

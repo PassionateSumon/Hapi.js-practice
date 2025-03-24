@@ -14,11 +14,11 @@ const authRoutes: ServerRoute[] = [
       validate: {
         payload: Joi.object({
           email: Joi.string().email().required().messages({
-            "any.required": "email is required!"
+            "any.required": "email is required!",
           }),
           password: Joi.string().min(6).required().messages({
             "string.min": "Password must be at least 6 chars",
-            "any.required": "password is required!"
+            "any.required": "password is required!",
           }),
         }),
         failAction: (request, h, err: any) => {
@@ -33,6 +33,7 @@ const authRoutes: ServerRoute[] = [
       },
       tags: ["api", "auth"],
       description: "Signup a new user.",
+      auth: false,
     },
   },
   {
@@ -43,10 +44,10 @@ const authRoutes: ServerRoute[] = [
       validate: {
         payload: Joi.object({
           email: Joi.string().email().required().messages({
-            "any.required": "email is required!"
+            "any.required": "email is required!",
           }),
           password: Joi.string().required().messages({
-            "any.required": "password is required!"
+            "any.required": "password is required!",
           }),
         }),
         failAction: (request, h, err: any) => {
@@ -61,6 +62,7 @@ const authRoutes: ServerRoute[] = [
       },
       tags: ["api", "auth"],
       description: "Login a user.",
+      auth: false,
     },
   },
 ];
